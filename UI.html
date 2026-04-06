@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI YouTube Sentiment Analyzer</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+body {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.glass {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    background: linear-gradient(to right, #00c6ff, #0072ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.btn-custom {
+    border-radius: 50px;
+    padding: 10px 20px;
+    background: linear-gradient(45deg, #00c6ff, #0072ff);
+    border: none;
+    color: white;
+}
+
+.btn-reset {
+    border-radius: 50px;
+    padding: 10px 15px;
+    background: linear-gradient(45deg, #ff6a00, #ee0979);
+    border: none;
+    color: white;
+}
+
+.card-hover:hover {
+    transform: translateY(-5px);
+}
+
+.thumbnail {
+    width: 100%;
+    border-radius: 15px;
+}
+
+.channel-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.metric-box {
+    text-align: center;
+    padding: 15px;
+}
+
+.loading {
+    display: none;
+    text-align: center;
+}
+
+.loader {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #ccc;
+    border-top: 5px solid #00c6ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: auto;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+</style>
+</head>
+
+<body>
+<div class="container py-5">
+
+<!-- Header -->
+<div class="text-center mb-5">
+    <h1 class="title">YouTube Sentiment Analyzer</h1>
+    <p>AI-powered NLP insights</p>
+</div>
+
+<!-- Input -->
+<div class="glass mb-4">
+    <div class="input-group">
+        <input type="url" id="url" class="form-control" placeholder="Paste YouTube URL...">
+        <button class="btn btn-custom" onclick="analyze()">
+            <i class="bi bi-search"></i>
+        </button>
+        <button class="btn btn-reset" onclick="resetApp()">
+            <i class="bi bi-arrow-clockwise"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Loading -->
+<div class="loading" id="loading">
+    <div class="loader"></div>
+    <p>Analyzing comments with AI...</p>
+</div>
+
+<!-- Video Card -->
+<div class="glass mb-4 card-hover">
+    <div class="row g-3">
+        <div class="col-md-5">
+            <img id="thumbnail" class="thumbnail" src="" alt="Thumbnail">
+        </div>
+        <div class="col-md-7">
+            <h4 id="title">Video Title</h4>
+            <div class="d-flex align-items-center mb-2">
+                <img id="channelImg" class="channel-img me-2" src="">
+                <strong id="channel">Channel Name</strong>
+            </div>
+            
+            <div class="row text-center">
+                <div class="col-4 metric-box">
+                    <i class="bi bi-eye"></i>
+                    <div id="views">0</div>
+                    <small>Views</small>
+                </div>
+                <div class="col-4 metric-box">
+                    <i class="bi bi-chat-dots"></i>
+                    <div id="comments">0</div>
+                    <small>Comments</small>
+                </div>
+                <div class="col-4 metric-box">
+                    <i class="bi bi-hand-thumbs-up"></i>
+                    <div id="likes">0</div>
+                    <small>Likes</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sentiment -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="glass text-center">
+            <h5>Positive</h5>
+            <h2 id="pos">0%</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass text-center">
+            <h5>Neutral</h5>
+            <h2 id="neu">0%</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass text-center">
+            <h5>Negative</h5>
+            <h2 id="neg">0%</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass text-center">
+            <h5>Score</h5>
+            <h2 id="score">0</h2>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="glass mb-4">
+    <h4>Analytics</h4>
+    <div class="row">
+        <div class="col-md-6"><canvas id="barChart"></canvas></div>
+        <div class="col-md-6"><canvas id="pieChart"></canvas></div>
+    </div>
+</div>
+
+<!-- Comments Table -->
+<div class="glass mb-4">
+    <h4>Top Comments</h4>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Comment</th>
+                    <th>Sentiment</th>
+                </tr>
+            </thead>
+            <tbody id="commentsTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Word Cloud -->
+<div class="glass text-center">
+    <h4>Word Cloud</h4>
+    <img id="wordcloud" class="img-fluid rounded" />
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+function analyze(){
+    document.getElementById('loading').style.display = 'block';
+    setTimeout(()=>{
+        document.getElementById('loading').style.display = 'none';
+        alert('Analysis Complete (connect backend)');
+    },2000);
+}
+
+function resetApp(){
+    document.getElementById('url').value = '';
+    document.getElementById('title').innerText = '-';
+    document.getElementById('channel').innerText = '-';
+    document.getElementById('views').innerText = '0';
+    document.getElementById('comments').innerText = '0';
+    document.getElementById('likes').innerText = '0';
+}
+</script>
+
+</body>
+</html>
