@@ -1,4 +1,6 @@
-# UI-Ideas
-YouTube Sentiment Analyzer is an AI-powered web application that analyzes video comments using NLP to classify sentiments as positive, negative, or neutral. It provides interactive dashboards, charts, and insights to help understand audience reactions effectively.
+# Bootstrap color
+A responsive webpage showcasing Bootstrap components including navbar, buttons, alerts, badges, and cards.
+Perfect for learning and experimenting with Bootstrap utilities and layouts.
 #Demo Link
-https://aswiniesakkiappan.github.io/UI-Ideas/
+
+https://aswiniesakkiappan.github.io/UI-Ideas/Bootstrap%20color/
